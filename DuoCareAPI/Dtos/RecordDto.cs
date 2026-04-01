@@ -12,7 +12,5 @@
         public string MedicalData { get; set; }
 
         public string Notes { get; set; }
-
-        public string UserId { get; set; }
     }
 }

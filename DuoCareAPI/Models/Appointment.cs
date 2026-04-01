@@ -1,4 +1,4 @@
-﻿using System;
+﻿using DuoCare.Models.Enums;
 
 namespace DuoCare.Models
 {
@@ -8,8 +8,7 @@ namespace DuoCare.Models
 
         public DateTime Date { get; set; }
 
-        public string Status { get; set; } = "Pending";
-        // initialized like this
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Pendiente;
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }

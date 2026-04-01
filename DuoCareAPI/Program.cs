@@ -35,17 +35,23 @@ builder.Services.AddAuthentication("Bearer")
 // 3. Register JwtService
 builder.Services.AddScoped<JwtService>();
 
+// 4. Register EmailService
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 4. Create roles at startup (without assigning them)
+
+// ? SEED: Create roles and the first admin user at startup
+// This block ensures that required roles exist and creates the first administrator if none exists.
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
+    // Create roles if missing
     string[] roles = { "Administrator", "User" };
 
     foreach (var role in roles)
@@ -53,9 +59,33 @@ using (var scope = app.Services.CreateScope())
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
     }
+
+    // Create first admin if not exists
+    var adminEmail = "admin@duocare.com";
+    var admin = await userManager.FindByEmailAsync(adminEmail);
+
+    if (admin == null)
+    {
+        admin = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FullName = "System Administrator",
+            EmailConfirmed = true
+        };
+
+        // Create admin with password
+        var result = await userManager.CreateAsync(admin, "@dminTFG");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, "Administrator");
+        }
+    }
 }
 
-// 5. Pipeline
+
+// 6. Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,10 +93,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

@@ -23,6 +23,11 @@ namespace DuoCare.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(RecordDto dto)
         {
+            var userId = User.FindFirst("uid")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
             var record = new Record
             {
                 Name = dto.Name,
@@ -30,7 +35,7 @@ namespace DuoCare.Controllers
                 Medication = dto.Medication,
                 MedicalData = dto.MedicalData,
                 Notes = dto.Notes,
-                UserId = dto.UserId
+                UserId = userId 
             };
 
             _context.Records.Add(record);
@@ -38,6 +43,7 @@ namespace DuoCare.Controllers
 
             return Ok(record);
         }
+
 
         // IMPORTANT:
         // With [Authorize]
@@ -55,7 +61,7 @@ namespace DuoCare.Controllers
 
             // If the user is NOT admin and NOT the owner → deny access
             if (!User.IsInRole("Administrator") && loggedUserId != id)
-                return Forbid("You are not allowed to access this record.");
+                return Forbid("No tienes permiso para ver este perfil.");
 
             var record = await _context.Records
                 .FirstOrDefaultAsync(r => r.UserId == id);

@@ -10,8 +10,6 @@ namespace DuoCare.Dtos
 
         public double Longitude { get; set; }
 
-        public string SenderId { get; set; }
-
         public string ReceiverId { get; set; }
     }
 }
