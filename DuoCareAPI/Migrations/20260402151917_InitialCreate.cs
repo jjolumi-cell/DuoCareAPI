@@ -52,22 +52,6 @@ namespace DuoCareAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserLocations",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Latitude = table.Column<double>(type: "float", nullable: false),
-                    Longitude = table.Column<double>(type: "float", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserLocations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -313,9 +297,6 @@ namespace DuoCareAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Records");
-
-            migrationBuilder.DropTable(
-                name: "UserLocations");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
