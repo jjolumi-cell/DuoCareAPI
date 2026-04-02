@@ -1,9 +1,12 @@
 using DuoCare.Data;
 using DuoCare.Models;
+using DuoCare.Services;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,7 @@ builder.Services.AddScoped<JwtService>();
 
 // 4. Register EmailService
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddHostedService<AppointmentCancelService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -5,6 +5,7 @@
         Pendiente,
         Leido,
         Aceptado,
+        Rechazada,
         Completado,
         Cancelado
     }

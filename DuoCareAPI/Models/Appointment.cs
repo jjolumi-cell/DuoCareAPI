@@ -18,5 +18,8 @@ namespace DuoCare.Models
 
         public string ReceiverId { get; set; }
         public User Receiver { get; set; }
+        public string? RejectedByUserId { get; set; }
+        public DateTime? RejectedAt { get; set; }
+
     }
 }

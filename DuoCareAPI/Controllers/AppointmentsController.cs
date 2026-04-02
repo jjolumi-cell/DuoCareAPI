@@ -161,6 +161,33 @@ namespace DuoCare.Controllers
             return Ok(appointment);
         }
 
+        [Authorize]
+        [HttpPut("{id}/reject")]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var userId = User.FindFirst("uid")?.Value;
+
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment == null)
+                return NotFound();
+
+            if (appointment.ReceiverId != userId)
+                return Forbid();
+
+            if (appointment.Status == AppointmentStatus.Aceptado ||
+                appointment.Status == AppointmentStatus.Completado)
+                return BadRequest("La cita ya no puede ser rechazada.");
+
+            appointment.Status = AppointmentStatus.Rechazada;
+            appointment.RejectedByUserId = userId;
+            appointment.RejectedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(appointment);
+        }
+
+
         // Complete appointment
         [Authorize]
         [HttpPut("{id}/complete")]
