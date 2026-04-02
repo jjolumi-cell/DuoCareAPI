@@ -13,6 +13,9 @@ namespace DuoCare.Data
 
         public DbSet<Appointment> Appointments { get; set; }
 
+        public DbSet<UserLocation> UserLocations { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

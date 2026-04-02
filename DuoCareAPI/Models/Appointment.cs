@@ -20,6 +20,9 @@ namespace DuoCare.Models
         public User Receiver { get; set; }
         public string? RejectedByUserId { get; set; }
         public DateTime? RejectedAt { get; set; }
+        public string? AbsentUserId { get; set; }
+        public DateTime? AutoCancelledAt { get; set; }
+
 
     }
 }

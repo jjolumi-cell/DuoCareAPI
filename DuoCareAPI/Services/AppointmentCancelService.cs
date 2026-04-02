@@ -19,7 +19,7 @@ namespace DuoCare.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken); 
+                await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
                 await CheckExpiredAppointments();
             }
         }
@@ -38,15 +38,66 @@ namespace DuoCare.Services
                     a.Status != AppointmentStatus.Cancelado)
                 .ToListAsync();
 
-            if (expiredAppointments.Count == 0)
+            if (!expiredAppointments.Any())
                 return;
 
-            foreach (var a in expiredAppointments)
+            foreach (var appointment in expiredAppointments)
             {
-                a.Status = AppointmentStatus.Cancelado;
+                var senderLocation = await context.UserLocations
+                    .Where(l => l.UserId == appointment.SenderId)
+                    .OrderByDescending(l => l.Timestamp)
+                    .FirstOrDefaultAsync();
+
+                var receiverLocation = await context.UserLocations
+                    .Where(l => l.UserId == appointment.ReceiverId)
+                    .OrderByDescending(l => l.Timestamp)
+                    .FirstOrDefaultAsync();
+
+                double senderDistance = CalculateDistance(
+                    senderLocation?.Latitude,
+                    senderLocation?.Longitude,
+                    appointment.Latitude,
+                    appointment.Longitude
+                );
+
+                double receiverDistance = CalculateDistance(
+                    receiverLocation?.Latitude,
+                    receiverLocation?.Longitude,
+                    appointment.Latitude,
+                    appointment.Longitude
+                );
+
+                if (senderDistance > 50)
+                    appointment.AbsentUserId = appointment.SenderId;
+
+                if (receiverDistance > 50)
+                    appointment.AbsentUserId = appointment.ReceiverId;
+
+                appointment.Status = AppointmentStatus.Cancelado;
+                appointment.AutoCancelledAt = DateTime.Now;
             }
 
             await context.SaveChangesAsync();
+        }
+
+        private double CalculateDistance(double? lat1, double? lon1, double lat2, double lon2)
+        {
+            if (lat1 == null || lon1 == null)
+                return double.MaxValue;
+
+            double R = 6371000; // metros
+            double dLat = (lat2 - lat1.Value) * Math.PI / 180;
+            double dLon = (lon2 - lon1.Value) * Math.PI / 180;
+
+            double a =
+                Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(lat1.Value * Math.PI / 180) *
+                Math.Cos(lat2 * Math.PI / 180) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return R * c;
         }
     }
 }
