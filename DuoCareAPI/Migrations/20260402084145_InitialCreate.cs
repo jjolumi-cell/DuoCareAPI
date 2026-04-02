@@ -103,7 +103,10 @@ namespace DuoCareAPI.Migrations
                     RejectedByUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RejectedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AbsentUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AutoCancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    AutoCancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AbsentUserLatitude = table.Column<double>(type: "float", nullable: true),
+                    AbsentUserLongitude = table.Column<double>(type: "float", nullable: true),
+                    AbsentUserDistance = table.Column<double>(type: "float", nullable: true)
                 },
                 constraints: table =>
                 {

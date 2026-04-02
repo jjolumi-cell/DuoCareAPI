@@ -33,7 +33,7 @@ namespace DuoCare.Services
 
             var expiredAppointments = await context.Appointments
                 .Where(a =>
-                    a.Date < now &&
+                    a.Date.AddMinutes(20) < now &&
                     a.Status != AppointmentStatus.Completado &&
                     a.Status != AppointmentStatus.Cancelado)
                 .ToListAsync();
@@ -68,10 +68,20 @@ namespace DuoCare.Services
                 );
 
                 if (senderDistance > 50)
+                {
                     appointment.AbsentUserId = appointment.SenderId;
+                    appointment.AbsentUserLatitude = senderLocation?.Latitude;
+                    appointment.AbsentUserLongitude = senderLocation?.Longitude;
+                    appointment.AbsentUserDistance = senderDistance;
+                }
 
                 if (receiverDistance > 50)
+                {
                     appointment.AbsentUserId = appointment.ReceiverId;
+                    appointment.AbsentUserLatitude = receiverLocation?.Latitude;
+                    appointment.AbsentUserLongitude = receiverLocation?.Longitude;
+                    appointment.AbsentUserDistance = receiverDistance;
+                }
 
                 appointment.Status = AppointmentStatus.Cancelado;
                 appointment.AutoCancelledAt = DateTime.Now;
@@ -79,6 +89,7 @@ namespace DuoCare.Services
 
             await context.SaveChangesAsync();
         }
+
 
         private double CalculateDistance(double? lat1, double? lon1, double lat2, double lon2)
         {

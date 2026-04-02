@@ -30,8 +30,17 @@ namespace DuoCareAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<double?>("AbsentUserDistance")
+                        .HasColumnType("float");
+
                     b.Property<string>("AbsentUserId")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("AbsentUserLatitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("AbsentUserLongitude")
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("AutoCancelledAt")
                         .HasColumnType("datetime2");

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DuoCareAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260402075954_InitialCreate")]
+    [Migration("20260402084145_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,8 +33,17 @@ namespace DuoCareAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<double?>("AbsentUserDistance")
+                        .HasColumnType("float");
+
                     b.Property<string>("AbsentUserId")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("AbsentUserLatitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("AbsentUserLongitude")
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("AutoCancelledAt")
                         .HasColumnType("datetime2");
