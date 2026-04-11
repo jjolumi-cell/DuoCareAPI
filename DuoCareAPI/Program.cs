@@ -41,6 +41,10 @@ builder.Services.AddScoped<JwtService>();
 // 4. Register EmailService
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddHostedService<AppointmentCancelService>();
+
+// Configure logging
+builder.Logging.AddFile("Logs/app.log");
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
