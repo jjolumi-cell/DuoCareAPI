@@ -1,8 +1,8 @@
-﻿using DuoCare.Models;
+﻿using DuoCareAPI.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace DuoCare.Data
+namespace DuoCareAPI.Data
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {

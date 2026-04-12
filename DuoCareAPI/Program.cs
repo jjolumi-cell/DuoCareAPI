@@ -1,12 +1,13 @@
-using DuoCare.Data;
-using DuoCare.Models;
-using DuoCare.Services;
-
+using Asp.Versioning;
+using DuoCareAPI.Data;
+using DuoCareAPI.Models;
+using DuoCareAPI.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,21 +46,71 @@ builder.Services.AddHostedService<AppointmentCancelService>();
 // Configure logging
 builder.Logging.AddFile("Logs/app.log");
 
+// Configure CORS. Permite solicitudes desde orígenes específicos definidos en appsettings.json
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>())
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Configure Rate Limiting, limita la cantidad de solicitudes por usuario para evitar abusos
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("Fixed", limiterOptions =>
+    {
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.PermitLimit = 100;
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 2;
+    });
+
+    options.AddFixedWindowLimiter("LoginRateLimit", limiterOptions =>
+    {
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 1;
+    });
+});
+
+// Configure API para manejar varias versiones de la API
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Bloqueo de cuentas
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(60);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+});
+
 var app = builder.Build();
 
+// Apply CORS
+app.UseCors("AllowSpecificOrigins");
 
-// ? SEED: Create roles and the first admin user at startup
-// This block ensures that required roles exist and creates the first administrator if none exists.
+// Apply Rate Limiting
+app.UseRateLimiter();
+
+// SEED: Create roles and first admin
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    // Create roles if missing
     string[] roles = { "Administrator", "User" };
 
     foreach (var role in roles)
@@ -68,8 +119,8 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    // Create first admin if not exists
-    var adminEmail = "admin@duocare.com";
+    var adminEmail = builder.Configuration["Admin:Email"];
+    var adminPassword = builder.Configuration["Admin:Password"];
     var admin = await userManager.FindByEmailAsync(adminEmail);
 
     if (admin == null)
@@ -82,8 +133,7 @@ using (var scope = app.Services.CreateScope())
             EmailConfirmed = true
         };
 
-        // Create admin with password
-        var result = await userManager.CreateAsync(admin, "@dminTFG");
+        var result = await userManager.CreateAsync(admin, adminPassword);
 
         if (result.Succeeded)
         {
@@ -92,8 +142,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
-// 6. Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

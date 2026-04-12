@@ -1,4 +1,4 @@
-﻿namespace DuoCare.Models.Enums
+﻿namespace DuoCareAPI.Models.Enums
 {
     public enum AppointmentStatus
     {

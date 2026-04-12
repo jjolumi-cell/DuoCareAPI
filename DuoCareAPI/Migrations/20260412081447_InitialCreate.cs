@@ -90,7 +90,9 @@ namespace DuoCareAPI.Migrations
                     AutoCancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AbsentUserLatitude = table.Column<double>(type: "float", nullable: true),
                     AbsentUserLongitude = table.Column<double>(type: "float", nullable: true),
-                    AbsentUserDistance = table.Column<double>(type: "float", nullable: true)
+                    AbsentUserDistance = table.Column<double>(type: "float", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

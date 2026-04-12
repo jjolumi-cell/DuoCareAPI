@@ -1,10 +1,10 @@
-﻿using DuoCare.Data;
-using DuoCare.Models.Enums;
+﻿using DuoCareAPI.Data;
+using DuoCareAPI.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DuoCare.Services
+namespace DuoCareAPI.Services
 {
     public class AppointmentCancelService : BackgroundService
     {

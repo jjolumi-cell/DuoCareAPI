@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DuoCare.Dtos
+namespace DuoCareAPI.Dtos
 {
     public class AppointmentResponseDto
     {

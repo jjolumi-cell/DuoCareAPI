@@ -1,6 +1,6 @@
-﻿using DuoCare.Models.Enums;
+﻿using DuoCareAPI.Models.Enums;
 
-namespace DuoCare.Models
+namespace DuoCareAPI.Models
 {
     public class Appointment
     {
@@ -28,5 +28,8 @@ namespace DuoCare.Models
         public double? AbsentUserLatitude { get; set; }
         public double? AbsentUserLongitude { get; set; }
         public double? AbsentUserDistance { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string CreatedBy { get; set; }
     }
 }

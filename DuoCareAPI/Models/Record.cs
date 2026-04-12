@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DuoCare.Models
+namespace DuoCareAPI.Models
 {
     public class Record
     {

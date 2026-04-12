@@ -1,12 +1,12 @@
-﻿using DuoCare.Data;
-using DuoCare.Dtos;
-using DuoCare.Models;
+﻿using DuoCareAPI.Data;
+using DuoCareAPI.Dtos;
+using DuoCareAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace DuoCare.Controllers
+namespace DuoCareAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

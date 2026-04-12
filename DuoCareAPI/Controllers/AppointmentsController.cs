@@ -1,13 +1,13 @@
-﻿using DuoCare.Data;
-using DuoCare.Dtos;
-using DuoCare.Models;
-using DuoCare.Models.Enums;
+﻿using DuoCareAPI.Data;
+using DuoCareAPI.Dtos;
+using DuoCareAPI.Models;
+using DuoCareAPI.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace DuoCare.Controllers
+namespace DuoCareAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -78,7 +78,8 @@ namespace DuoCare.Controllers
                     Longitude = dto.Longitude,
                     SenderId = userIdFromToken,
                     ReceiverId = dto.ReceiverId,
-                    Status = AppointmentStatus.Pendiente
+                    Status = AppointmentStatus.Pendiente,
+                    CreatedBy = userIdFromToken
                 };
 
                 _context.Appointments.Add(appointment);

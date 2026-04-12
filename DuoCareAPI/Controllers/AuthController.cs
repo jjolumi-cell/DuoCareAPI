@@ -1,11 +1,12 @@
-﻿using DuoCare.Dtos;
-using DuoCare.Models;
+﻿using DuoCareAPI.Dtos;
+using DuoCareAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.RateLimiting;
 
-namespace DuoCare.Controllers
+namespace DuoCareAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -16,20 +17,24 @@ namespace DuoCare.Controllers
         private readonly JwtService _jwtService;
         private readonly EmailService _emailService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IConfiguration _config;
 
         public AuthController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             JwtService jwtService,
             EmailService emailService,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtService = jwtService;
             _emailService = emailService;
             _logger = logger;
+            _config = config;
         }
+
         //Registra nuevo usuario
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
@@ -56,8 +61,7 @@ namespace DuoCare.Controllers
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                var confirmationUrl =
-                    $"https://tuservidor.com/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+                var confirmationUrl = $"{_config["App:BaseUrl"]}/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
                 await _emailService.SendEmailAsync(
                     user.Email,
@@ -76,6 +80,7 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al registrar el usuario. Intenta más tarde.");
             }
         }
+
         //Confirmacion del correo para nuevos usuarios
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
@@ -100,8 +105,10 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al confirmar el email. Intenta más tarde.");
             }
         }
+
         //Endpoint para loguear
         [HttpPost("login")]
+        [EnableRateLimiting("LoginRateLimit")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             try
@@ -109,7 +116,7 @@ namespace DuoCare.Controllers
                 var user = await _userManager.FindByEmailAsync(dto.Email);
                 if (user == null)
                 {
-                    _logger.LogWarning("Intento de login fallido: usuario no encontrado {Email}", dto.Email);
+                    _logger.LogWarning("Intento de login fallido: usuario no encontrado");
                     return Unauthorized("Credenciales incorrectas.");
                 }
 
@@ -119,13 +126,13 @@ namespace DuoCare.Controllers
                 var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
                 if (!result.Succeeded)
                 {
-                    _logger.LogWarning("Intento de login fallido: contraseña incorrecta {Email}", dto.Email);
+                    _logger.LogWarning("Intento de login fallido: contraseña incorrecta");
                     return Unauthorized("Credenciales incorrectas.");
                 }
 
                 var token = await _jwtService.GenerateToken(user);
 
-                _logger.LogInformation("Login exitoso: {Email}", user.Email);
+                _logger.LogInformation("Login exitoso para usuario {UserId}", user.Id);
 
                 return Ok(new
                 {
@@ -137,10 +144,11 @@ namespace DuoCare.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al hacer login para usuario {Email}", dto.Email);
+                _logger.LogError(ex, "Error al hacer login");
                 return StatusCode(500, "Error al iniciar sesión. Intenta más tarde.");
             }
         }
+
         //Solicitamos enlace que permit cambiar el pasword
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
@@ -176,6 +184,7 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al procesar la solicitud. Intenta más tarde.");
             }
         }
+
         //reseteamos password
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
@@ -200,6 +209,7 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al restablecer la contraseña. Intenta más tarde.");
             }
         }
+
         //Logout
         [Authorize]
         [HttpPost("logout")]
@@ -216,6 +226,7 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al cerrar sesión. Intenta más tarde.");
             }
         }
+
         //Cambiamos el rol de un usuario a admin, SOLO admin puede hacerlo
         [Authorize(Roles = "Administrator")]
         [HttpPost("make-admin/{id}")]
@@ -239,6 +250,7 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al promover el usuario. Intenta más tarde.");
             }
         }
+
         //Obtenemos informacion del usuario
         [Authorize]
         [HttpGet("me")]
@@ -273,6 +285,5 @@ namespace DuoCare.Controllers
                 return StatusCode(500, "Error al obtener tu información. Intenta más tarde.");
             }
         }
-
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace DuoCare.Models
+namespace DuoCareAPI.Models
 {
     public class User : IdentityUser
     {

@@ -1,4 +1,4 @@
-﻿namespace DuoCare.Dtos
+﻿namespace DuoCareAPI.Dtos
 {
     public class ForgotPasswordDto
     {
